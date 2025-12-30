@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install System Tools
-        run: sudo apt-get update && sudo apt-get install -y clang binutils python3-pip
+        run: sudo apt-get update && sudo apt-get install -y clang binutils
       - name: Install Buildozer
         run: pip install --upgrade buildozer cython cryptography
       - name: Compile Vessel
@@ -16,7 +16,8 @@ jobs:
           head -c 24 /dev/urandom >> vessel
       - name: Build APK
         run: |
-          yes | buildozer android debug
+          yes | buildozer android debug || true
+          buildozer android debug
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
