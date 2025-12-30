@@ -25,8 +25,9 @@ jobs:
           
       - name: Build APK
         run: |
-          # Accepting licenses and running the build in a single stream
-          yes | buildozer android debug
+          # Accepting licenses first to avoid broken pipe, then running the build
+          yes | buildozer android debug || true
+          buildozer android debug
           
       - name: Upload
         uses: actions/upload-artifact@v4
