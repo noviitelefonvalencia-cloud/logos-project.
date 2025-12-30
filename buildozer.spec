@@ -5,7 +5,7 @@ package.domain = org.logos.apex
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,c,h
 version = 0.1
-requirements = python3,kivy,cryptography
+requirements = python3,kivy,cryptography,hostpython3
 
 orientation = portrait
 fullscreen = 1
@@ -17,8 +17,6 @@ android.permissions = INTERNET, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE
 android.api = 33
 android.minapi = 21
 android.ndk = 25c
-android.ndk_path = 
-android.sdk_path = 
 android.accept_sdk_license = True
 android.skip_setup = False
 
