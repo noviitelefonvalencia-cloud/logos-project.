@@ -1,19 +1,26 @@
 [app]
-title = ColdChain Apex
+title = Logos Apex
 package.name = apex
-package.domain = org.logos
+package.domain = org.logos.apex
 source.dir = .
-source.include_exts = py,png,jpg,kv,atlas,c,h,json
-version = 6.3.8
-requirements = python3,kivy,cryptography,requests
+source.include_exts = py,png,jpg,kv,atlas,c,h
+version = 0.1
+requirements = python3,kivy,cryptography
+
 orientation = portrait
+fullscreen = 1
 android.archs = arm64-v8a
+android.allow_backup = False
+
+# Android specific configuration
+android.permissions = INTERNET, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE
 android.api = 33
 android.minapi = 21
-android.ndk = 25b
-android.ndk_api = 21
+android.ndk = 25c
+android.ndk_path = 
+android.sdk_path = 
 android.accept_sdk_license = True
-android.skip_update = False
+android.skip_setup = False
 
 [buildozer]
 log_level = 2
