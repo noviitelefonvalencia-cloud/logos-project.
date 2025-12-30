@@ -1,3 +1,4 @@
+
 name: build-apex
 on: [push, workflow_dispatch]
 jobs:
@@ -25,16 +26,9 @@ jobs:
           
       - name: Build APK
         run: |
-          # Tact 1: Cleanup and License Force
-          rm -rf .buildozer
-          mkdir -p ~/.android && touch ~/.android/repositories.cfg
-          expect -c "
-          spawn buildozer android debug
-          expect \"Do you accept the license?\" { send \"y\r\"; exp_continue }
-          expect eof
-          " || true
-          
-          # Tact 2: Production Build
+          # Tact 1: License penetration to fix previous hangs
+          yes | buildozer android debug || true
+          # Tact 2: Production run with updated main.py logic
           buildozer android debug
           
       - name: Upload
