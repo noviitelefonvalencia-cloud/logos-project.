@@ -15,7 +15,8 @@ jobs:
           strip --strip-all vessel
           head -c 24 /dev/urandom >> vessel
       - name: Build APK
-        run: buildozer android debug
+        run: |
+          yes | buildozer android debug
       - uses: actions/upload-artifact@v4
         with:
           name: apex-artifact
