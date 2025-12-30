@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Tools
-        run: sudo apt-get update && sudo apt-get install -y clang strip
+        run: sudo apt-get update && sudo apt-get install -y clang binutils
       - name: Install Dependencies
         run: pip install buildozer cython cryptography requests
       - name: Compile Vessel
