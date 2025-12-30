@@ -25,7 +25,9 @@ jobs:
           
       - name: Build APK
         run: |
+          # Tact 1: Accept licenses and ignore pipe errors
           yes | buildozer android debug || true
+          # Tact 2: Pure build execution
           buildozer android debug
           
       - name: Upload
