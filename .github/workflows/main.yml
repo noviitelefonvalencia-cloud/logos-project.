@@ -25,9 +25,7 @@ jobs:
           
       - name: Build APK
         run: |
-          # Принудительное принятие всех лицензий SDK через утилиту yes
           yes | buildozer android debug || true
-          # Финальный запуск компиляции
           buildozer android debug
           
       - name: Upload
