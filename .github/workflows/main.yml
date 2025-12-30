@@ -5,17 +5,18 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: Install System Tools
+      - name: System Setup
         run: sudo apt-get update && sudo apt-get install -y clang binutils zip unzip
-      - name: Manual NDK Install
+      - name: Setup NDK
         run: |
+          mkdir -p ~/.buildozer/android/platform
           wget -q https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
           unzip -q android-ndk-r25b-linux.zip
+          mv android-ndk-r25b ~/.buildozer/android/platform/android-ndk-r25b
       - name: Build APK
         run: |
           pip install --upgrade buildozer cython cryptography
-          yes | buildozer android debug || true
-          buildozer android debug
+          yes | buildozer android debug
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
