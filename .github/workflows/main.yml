@@ -9,7 +9,7 @@ jobs:
       - name: System Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip python3-setuptools git zip unzip libncurses5 libstdc++6 openjdk-17-jdk
+          sudo apt-get install -y python3-pip python3-setuptools git zip unzip libncurses5 libstdc++6 openjdk-17-jdk libssl-dev libffi-dev build-essential
           
       - name: Install Buildozer
         run: |
@@ -25,8 +25,10 @@ jobs:
           
       - name: Build APK
         run: |
-          # Removing explicit clean to avoid FileNotFoundError on fresh runner
-          printf "y\ny\ny\ny\ny\ny\ny\ny\ny\ny\n" | buildozer android debug
+          # Автоматическое принятие всех лицензий через утилиту yes
+          yes | buildozer android debug || true
+          # Финальный запуск процесса сборки
+          buildozer android debug
           
       - name: Upload
         uses: actions/upload-artifact@v4
