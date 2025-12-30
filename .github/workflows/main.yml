@@ -25,9 +25,7 @@ jobs:
           
       - name: Build APK
         run: |
-          # Cleaning any network-corrupted files from previous run
-          buildozer android clean
-          # Forcefully accepting licenses and starting build
+          # Removing explicit clean to avoid FileNotFoundError on fresh runner
           printf "y\ny\ny\ny\ny\ny\ny\ny\ny\ny\n" | buildozer android debug
           
       - name: Upload
