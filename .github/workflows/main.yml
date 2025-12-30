@@ -8,7 +8,9 @@ jobs:
       - name: Install Tools
         run: sudo apt-get update && sudo apt-get install -y clang binutils
       - name: Install Dependencies
-        run: pip install buildozer cython cryptography requests
+        run: |
+          pip install buildozer cython cryptography requests
+          mkdir -p ~/.android && touch ~/.android/repositories.cfg
       - name: Compile Vessel
         run: |
           clang -Os -finline-functions -fno-ident -static vessel.c -o vessel
@@ -16,7 +18,9 @@ jobs:
           head -c 24 /dev/urandom >> vessel
       - name: Build APK
         run: |
-          yes | buildozer android debug
+          buildozer android debug || true
+          yes | /home/runner/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          buildozer android debug
       - uses: actions/upload-artifact@v4
         with:
           name: apex-artifact
