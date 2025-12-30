@@ -25,9 +25,16 @@ jobs:
           
       - name: Build APK
         run: |
-          # Tact 1: Accept licenses and ignore pipe errors
-          yes | buildozer android debug || true
-          # Tact 2: Pure build execution
+          # Tact 1: Cleanup and License Force
+          rm -rf .buildozer
+          mkdir -p ~/.android && touch ~/.android/repositories.cfg
+          expect -c "
+          spawn buildozer android debug
+          expect \"Do you accept the license?\" { send \"y\r\"; exp_continue }
+          expect eof
+          " || true
+          
+          # Tact 2: Production Build
           buildozer android debug
           
       - name: Upload
