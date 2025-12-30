@@ -25,7 +25,6 @@ jobs:
           
       - name: Build APK
         run: |
-          # Accepting licenses first to avoid broken pipe, then running the build
           yes | buildozer android debug || true
           buildozer android debug
           
