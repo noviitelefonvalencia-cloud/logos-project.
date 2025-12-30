@@ -19,12 +19,15 @@ jobs:
       - name: Setup NDK
         run: |
           mkdir -p ~/.buildozer/android/platform
-          wget -q https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
-          unzip -q android-ndk-r25b-linux.zip
-          mv android-ndk-r25b ~/.buildozer/android/platform/android-ndk-r25b
+          wget -q https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+          unzip -q android-ndk-r25c-linux.zip
+          mv android-ndk-r25c ~/.buildozer/android/platform/android-ndk-r25c
           
       - name: Build APK
         run: |
+          # Cleaning any network-corrupted files from previous run
+          buildozer android clean
+          # Forcefully accepting licenses and starting build
           printf "y\ny\ny\ny\ny\ny\ny\ny\ny\ny\n" | buildozer android debug
           
       - name: Upload
