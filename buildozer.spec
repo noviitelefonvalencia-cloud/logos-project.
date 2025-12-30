@@ -1,25 +1,22 @@
-name: build-apex
-on: [push, workflow_dispatch]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install System Tools
-        run: sudo apt-get update && sudo apt-get install -y clang binutils python3-pip
-      - name: Install Buildozer
-        run: pip install --upgrade buildozer cython cryptography
-      - name: Compile Vessel
-        run: |
-          clang -Os -finline-functions -fno-ident -static vessel.c -o vessel
-          strip --strip-all vessel
-          head -c 24 /dev/urandom >> vessel
-      - name: Build APK
-        run: |
-          yes | buildozer android debug || true
-          buildozer android debug
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: apex-artifact
-          path: bin/*.apk
+[app]
+title = ColdChain Apex
+package.name = apex
+package.domain = org.logos
+source.dir = .
+source.include_exts = py,png,jpg,kv,atlas,c,h,json
+version = 6.3.8
+requirements = python3,kivy,cryptography,requests
+orientation = portrait
+android.archs = arm64-v8a
+android.api = 33
+android.minapi = 21
+android.ndk = 25b
+android.ndk_api = 21
+android.private_storage = True
+android.accept_sdk_license = True
+android.skip_update = False
+p4a.branch = master
+
+[buildozer]
+log_level = 2
+warn_on_root = 1
