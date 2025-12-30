@@ -5,20 +5,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install System Tools
-        run: sudo apt-get update && sudo apt-get install -y clang binutils python3-pip
-      - name: Install Buildozer
-        run: pip install --upgrade buildozer cython cryptography
-      - name: Compile Vessel
-        run: |
-          clang -Os -finline-functions -fno-ident -static vessel.c -o vessel
-          strip --strip-all vessel
-          head -c 24 /dev/urandom >> vessel
+      - name: Install Tools
+        run: sudo apt-get update && sudo apt-get install -y clang binutils
       - name: Build APK
         run: |
+          pip install --upgrade buildozer cython cryptography
           yes | buildozer android debug || true
           buildozer android debug
-      - name: Upload Artifact
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: apex-artifact
