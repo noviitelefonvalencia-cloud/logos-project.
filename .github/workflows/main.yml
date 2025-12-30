@@ -18,16 +18,16 @@ jobs:
 
       - name: Build APK
         run: |
-          # Tact 1: Initialize structure (fetch SDK/NDK)
+          # Tact 1: Initialize SDK and NDK structure
           buildozer android debug || true
           
-          # Tact 2: Direct license injection into created directories
+          # Tact 2: Direct License Injection to bypass interactive prompts
           mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
           echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56263458b1005833e7b11815127d970af0c3f41\n263b06347e9f51381f412f94490d13d6976851e0" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
           echo -e "84831b9409646a918e30573bab4c9c91346d8abd\n5046675910430806541b92b2198af99619c07185\n8bc7733633cf40ef55073e51f50684f8db11239c" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
           
-          # Tact 3: Final compilation
-          buildozer android debug
+          # Tact 3: Verbose build with profiling to prevent silent hangs
+          buildozer --verbose android debug --profile
 
       - name: Upload
         uses: actions/upload-artifact@v4
