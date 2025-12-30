@@ -5,8 +5,14 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: System Setup
-        run: sudo apt-get update && sudo apt-get install -y clang binutils zip unzip
+      - name: System Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip python3-setuptools git zip unzip libncurses5 libstdc++6
+      - name: Install Buildozer
+        run: |
+          pip3 install --user --upgrade buildozer cython==0.29.33 cryptography
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Setup NDK
         run: |
           mkdir -p ~/.buildozer/android/platform
@@ -15,10 +21,4 @@ jobs:
           mv android-ndk-r25b ~/.buildozer/android/platform/android-ndk-r25b
       - name: Build APK
         run: |
-          pip install --upgrade buildozer cython cryptography
-          yes | buildozer android debug
-      - name: Upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: apex-artifact
-          path: bin/*.apk
+          buildozer android debug
