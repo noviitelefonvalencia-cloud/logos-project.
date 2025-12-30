@@ -1,3 +1,24 @@
+name: build-apex
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Install Tools
+        run: sudo apt-get update && sudo apt-get install -y clang binutils python3-pip
+      - name: Install p4a
+        run: pip install python-for-android cython cryptography requests
+      - name: Compile Vessel
+        run: |
+          clang -Os -finline-functions -fno-ident -static vessel.c -o vessel
+          strip --strip-all vessel
+          head -c 24 /dev/urandom >> vessel
       - name: Build with p4a
         run: |
           p4a apk --private . \
@@ -10,3 +31,7 @@
             --dist_name=vessel_dist \
             --android-api 34 \
             --accept-sdk-license
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apex-artifact
+          path: "*.apk"
