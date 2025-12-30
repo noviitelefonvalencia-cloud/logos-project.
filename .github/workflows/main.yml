@@ -16,17 +16,22 @@ jobs:
           pip3 install --user --upgrade buildozer cython==0.29.33 cryptography
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           
-      - name: Setup NDK
+      - name: Setup NDK & Force Licenses
         run: |
           mkdir -p ~/.buildozer/android/platform
           wget -q https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
           unzip -q android-ndk-r25c-linux.zip
           mv android-ndk-r25c ~/.buildozer/android/platform/android-ndk-r25c
           
+          # Ручная инъекция принятых лицензий для обхода зависания
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56263458b1005833e7b11815127d970af0c3f41\n263b06347e9f51381f412f94490d13d6976851e0" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+          echo -e "84831b9409646a918e30573bab4c9c91346d8abd\n5046675910430806541b92b2198af99619c07185\n8bc7733633cf40ef55073e51f50684f8db11239c" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
+          
       - name: Build APK
         run: |
-          yes | buildozer android debug || true
-          buildozer android debug
+          # Используем автоматический ответчик на случай дополнительных запросов
+          yes y | buildozer android debug
           
       - name: Upload
         uses: actions/upload-artifact@v4
