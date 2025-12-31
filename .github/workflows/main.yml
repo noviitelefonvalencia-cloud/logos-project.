@@ -18,8 +18,8 @@ jobs:
 
       - name: Build APK
         run: |
-          # The key is to let buildozer handle licenses via command line flag
-          # This prevents the "path does not exist" error seen in build #63
+          # Use the official flag to accept all licenses automatically
+          # This avoids the "path does not exist" error from manual injection
           buildozer --verbose android debug --app-android-accept-sdk-license --profile
 
       - name: Upload
