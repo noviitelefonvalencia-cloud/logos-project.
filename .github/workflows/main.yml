@@ -6,21 +6,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: System Setup
+      - name: System Environment Setup
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip openjdk-17-jdk wget zip unzip libncurses5 libstdc++6
-          
-      - name: SDK Bootstrap
-        run: |
-          mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools
-          wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O tools.zip
-          unzip -q tools.zip -d ~/.buildozer/android/platform/android-sdk/cmdline-tools
-          mv ~/.buildozer/android/platform/android-sdk/cmdline-tools/cmdline-tools ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest
-          yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/.buildozer/android/platform/android-sdk --licenses
-          
-      - name: Build
-        run: |
+          sudo apt-get install -y python3-pip openjdk-17-jdk libncurses5 libstdc++6
           pip3 install --user --upgrade buildozer cython==0.29.33
-          export PATH=$PATH:$HOME/.local/bin
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          
+      - name: Build with System SDK
+        env:
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+          ANDROID_NDK_ROOT: /usr/local/lib/android/sdk/ndk-bundle
+        run: |
+          # Accepting licenses for the pre-installed system SDK
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
+          
+          # Forcing buildozer to use pre-installed SDK/NDK
           buildozer --verbose android debug
