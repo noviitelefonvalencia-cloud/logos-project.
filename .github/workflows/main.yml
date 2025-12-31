@@ -18,6 +18,6 @@ jobs:
 
       - name: Build APK
         run: |
-          # We use a piped 'yes' to handle the Android SDK license prompts
-          # and the built-in buildozer flag for maximum stability.
-          yes | buildozer --verbose android debug --app-android-accept-sdk-license --profile
+          # We use ONLY the internal flag to accept licenses. 
+          # This prevents "Broken pipe" by letting Buildozer manage its own input stream.
+          buildozer --verbose android debug --app-android-accept-sdk-license --profile
