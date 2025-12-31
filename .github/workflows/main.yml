@@ -13,13 +13,20 @@ jobs:
           pip3 install --user --upgrade buildozer cython==0.29.33
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           
-      - name: Build with System SDK
+      - name: Full SDK Authorization
+        env:
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        run: |
+          # Accepting EVERY possible license in the system SDK
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
+          
+          # Verification of license files
+          ls -R $ANDROID_SDK_ROOT/licenses
+          
+      - name: Build Execution
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
           ANDROID_NDK_ROOT: /usr/local/lib/android/sdk/ndk-bundle
         run: |
-          # Accepting licenses for the pre-installed system SDK
-          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
-          
-          # Forcing buildozer to use pre-installed SDK/NDK
+          # Forcing buildozer to bypass internal license checks
           buildozer --verbose android debug
