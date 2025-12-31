@@ -9,20 +9,29 @@ jobs:
       - name: System Environment Setup
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip openjdk-17-jdk libncurses5 libstdc++6
+          sudo apt-get install -y python3-pip openjdk-17-jdk libncurses5 libstdc++6 wget zip unzip
           pip3 install --user --upgrade buildozer cython==0.29.33
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           
-      - name: Hard-Injection of SDK Licenses
+      - name: SDK and License Injection
         run: |
-          # Creating the license directory manually
+          # 1. Create base directory
+          mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools
+          
+          # 2. Download and Extract Command Line Tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O tools.zip
+          unzip -q tools.zip -d ~/.buildozer/android/platform/android-sdk/cmdline-tools
+          mv ~/.buildozer/android/platform/android-sdk/cmdline-tools/cmdline-tools ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest
+          
+          # 3. Logic Bridge: Fix legacy path for Buildozer
+          mkdir -p ~/.buildozer/android/platform/android-sdk/tools/bin
+          ln -s ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
+          
+          # 4. Hard-Injection of Licenses
           mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-          # Injecting the exact hashes that signify 'Accepted' status
-          echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb7437c3550b3174304e\n24333f8a63b6825ea4c5573f691c9029c006d1d4" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
-          echo -e "84831b9409646a918e30573bab4c9c91346d8abd" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
-          echo -e "d975f751698a77b662f1254ddbeed39c31016c28" > ~/.buildozer/android/platform/android-sdk/licenses/intel-android-extra-license
+          echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb7437c3550b3174304e" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
 
       - name: Total Resonance Build
         run: |
-          # No more 'yes |' needed, licenses are pre-injected
-          buildozer --verbose android debug
+          # Use internal buildozer check bypass
+          yes | buildozer --verbose android debug
