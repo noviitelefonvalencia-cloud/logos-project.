@@ -18,11 +18,12 @@ jobs:
 
       - name: Build APK
         run: |
-          # 1. Force directory creation
-          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          # 1. Clean any corrupted artifacts from previous runs
+          rm -rf ~/.buildozer
           
-          # 2. Inject license hashes
+          # 2. Pre-create directory and inject license to avoid interaction
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
           echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56263458b1005833e7b11815127d970af0c3f41\n263b06347e9f51381f412f94490d13d6976851e0" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
           
-          # 3. Execution
+          # 3. Execution with extra verbosity to track the network
           buildozer --verbose android debug --app-android-accept-sdk-license --profile
