@@ -1,59 +1,34 @@
 [app]
-# (str) Title of your application
-title = Apex_Vessel
-
-# (str) Package name
-package.name = logos_project
-
-# (str) Package domain (for mask purposes)
+title = Vessel
+package.name = vessel
 package.domain = org.vessel.ether
-
-# (str) Source code where the main.py is located
 source.dir = .
+source.include_exts = py,png,jpg,kv,atlas,pub,so
+source.include_patterns = assets/*,lib/*,key.pub
+version = 1.0.4
 
-# (list) Source files to include (let extensions cover C/SO files)
-source.include_exts = py,png,jpg,kv,atlas,c,h,so
+requirements = python3,kivy==2.2.1,pillow,hostpython3,ctypes
 
-# (str) Application versioning
-version = 0.1.1
-
-# (list) Application requirements
-# Cython is pinned to match GitHub environment
-requirements = python3,kivy,cython==0.29.33,cryptography
-
-# (str) Supported orientation
 orientation = portrait
+fullscreen = 1
+android.archs = arm64-v8a, armeabi-v7a
+android.allow_backup = False
 
-# (list) Permissions
-android.permissions = INTERNET,CAMERA
+# Permission for the vault resonance
+android.permissions = READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
 
-# (int) Target Android API
-android.api = 31
-
-# (int) Minimum API your APK will support
+# SDK/NDK sync with Workflow v.118
+android.api = 33
 android.minapi = 21
-
-# (str) Android NDK version (stable for C-compilation)
+android.sdk = 33
 android.ndk = 25b
+android.ndk_path = ~/.buildozer/android/platform/android-ndk-r25b
+android.sdk_path = ~/.buildozer/android/platform/android-sdk
 
-# (bool) Skip the license prompt
-android.accept_sdk_license = True
-
-# (list) The Android architectures to build for
-android.archs = arm64-v8a
-
-# (str) Android entry point
-android.entrypoint = org.kivy.android.PythonActivity
-
-# (str) Android logcat filters (Diagnostic Mode)
-android.logcat_filters = *:S python:D vessel:D
-
-# [app:custom] Section for "Moriarty" trace
-m_signature = 0x88f2e77b10a1
+# Infrastructure
+p4a.branch = master
+p4a.bootstrap = sdl2
 
 [buildozer]
-# (int) Log level (2 = debug)
 log_level = 2
-
-# (int) Display warning if buildozer is run as root (0 = False)
 warn_on_root = 1
