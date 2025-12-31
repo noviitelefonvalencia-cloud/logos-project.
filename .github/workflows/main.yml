@@ -1,50 +1,26 @@
-import os
-from kivy.app import App
-from kivy.uix.label import Label
-from kivy.utils import platform
-
-class VesselApp(App):
-    def build(self):
-        # Initializing data protection structures
-        self.prepare_vault()
-        
-        # UI showing system status
-        status = "RESONANCE_ACTIVE" if self.check_core() else "CORE_LOCKED"
-        return Label(text=f"Vessel OS: {status}")
-
-    def prepare_vault(self):
-        import shutil
-        from os.path import join, exists
-        from os import makedirs
-        
-        # Path for the internal license vault
-        if platform == 'android':
-            vault_path = join(self.user_data_dir, '.license_vault')
-            if not exists(vault_path):
-                makedirs(vault_path)
-            
-            # Injection: Moving key from assets to vault
-            asset_key = "key.pub"
-            target_key = join(vault_path, "key.pub")
-            
-            if exists(asset_key) and not exists(target_key):
-                try:
-                    shutil.copy(asset_key, target_key)
-                except Exception:
-                    pass
-
-    def check_core(self):
-        # Logic to be linked with vessel.so
-        try:
-            import ctypes
-            # Path to the compiled C-core
-            lib_path = os.path.join(os.getcwd(), 'lib', 'vessel.so')
-            if os.path.exists(lib_path):
-                vessel = ctypes.CDLL(lib_path)
-                return vessel.core_main() == 1
-            return False
-        except Exception:
-            return False
-
-if __name__ == '__main__':
-    VesselApp().run()
+name: build-apex
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: System Setup
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip openjdk-17-jdk wget zip unzip libncurses5 libstdc++6
+          
+      - name: SDK Bootstrap
+        run: |
+          mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O tools.zip
+          unzip -q tools.zip -d ~/.buildozer/android/platform/android-sdk/cmdline-tools
+          mv ~/.buildozer/android/platform/android-sdk/cmdline-tools/cmdline-tools ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest
+          yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/.buildozer/android/platform/android-sdk --licenses
+          
+      - name: Build
+        run: |
+          pip3 install --user --upgrade buildozer cython==0.29.33
+          export PATH=$PATH:$HOME/.local/bin
+          buildozer --verbose android debug
