@@ -16,8 +16,16 @@ jobs:
           pip3 install --user --upgrade buildozer cython==0.29.33 cryptography
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
+      - name: Pre-Accept Licenses
+        run: |
+          # Create the path where Buildozer expects to find accepted licenses
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          
+          # Inject the specific hash for Android SDK License 33/34
+          # This is the "digital signature" of your agreement
+          echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56263458b1005833e7b11815127d970af0c3f41\n263b06347e9f51381f412f94490d13d6976851e0" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+
       - name: Build APK
         run: |
-          # We use ONLY the internal flag to accept licenses. 
-          # This prevents "Broken pipe" by letting Buildozer manage its own input stream.
-          buildozer --verbose android debug --app-android-accept-sdk-license --profile
+          # Now we run buildozer. It will see the license file and skip the prompt.
+          buildozer --verbose android debug --profile
