@@ -25,22 +25,20 @@ jobs:
           pip3 install --user --upgrade buildozer cython==0.29.33 cryptography
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
+      - name: Force Inject Licenses
+        run: |
+          # Creating license directory in both system and buildozer paths
+          mkdir -p $ANDROID_HOME/licenses
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          
+          # Injecting known hashes for Android SDK licenses
+          echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56263458b1005833e7b11815127d970af0c3f41\n263b06347e9f51381f412f94490d13d6976851e0" > $ANDROID_HOME/licenses/android-sdk-license
+          cp $ANDROID_HOME/licenses/android-sdk-license ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+
       - name: Build APK
         run: |
-          # 1. Quietly accept licenses via system sdkmanager (No pipes!)
-          sdkmanager --licenses <<EOF
-          y
-          y
-          y
-          y
-          y
-          y
-          y
-          EOF
-          
-          # 2. Link buildozer to the pre-installed system SDK
+          # Direct linking to verified system SDK
           export ANDROID_SDK_HOME=$ANDROID_HOME
           export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
           
-          # 3. Final build with pure flag
           buildozer --verbose android debug --app-android-accept-sdk-license --profile
