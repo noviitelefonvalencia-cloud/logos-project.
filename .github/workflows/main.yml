@@ -15,23 +15,32 @@ jobs:
 
       - name: Forced SDK Structure Injection
         run: |
+          # 1. Подготовка путей
           export SDK_DIR=$HOME/.buildozer/android/platform/android-sdk
           mkdir -p $SDK_DIR/cmdline-tools
+          
+          # 2. Развертывание инструментов командной строки
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O tools.zip
           unzip -q tools.zip -d $SDK_DIR/cmdline-tools
           mv $SDK_DIR/cmdline-tools/cmdline-tools $SDK_DIR/cmdline-tools/latest
+          
+          # 3. Создание моста путей (Mimicry)
           mkdir -p $SDK_DIR/tools/bin
           ln -sf $SDK_DIR/cmdline-tools/latest/bin/sdkmanager $SDK_DIR/tools/bin/sdkmanager
+          
+          # 4. Инъекция лицензий (Фикс сбоя Broken pipe)
           mkdir -p $SDK_DIR/licenses
           echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb7437c3550b3174304e" > $SDK_DIR/licenses/android-sdk-license
+          
+          # 5. Принудительная авторизация
           yes | $SDK_DIR/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK_DIR --licenses || true
 
       - name: Build Materialization
         run: |
-          # Прямая инъекция путей в среду выполнения Buildozer
-          export ANDROID_SDK_HOME=$HOME/.buildozer/android/platform/android-sdk
-          export ANDROID_NDK_HOME=$HOME/.buildozer/android/platform/android-ndk-r25b
-          export PATH=$PATH:$ANDROID_SDK_HOME/tools/bin:$ANDROID_SDK_HOME/platform-tools
+          # Прямая фиксация переменных среды для предотвращения циклической загрузки
+          export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk
+          export ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
+          export PATH=$PATH:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools
           
-          # Запуск с подавлением интерактивных запросов
+          # Запуск сборки с игнорированием интерактивных запросов
           yes | buildozer --verbose android debug
