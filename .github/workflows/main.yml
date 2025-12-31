@@ -5,26 +5,20 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: System Setup
+      - name: System Tools
+        run: sudo apt-get update && sudo apt-get install -y python3-pip openjdk-17-jdk wget zip unzip
+      
+      - name: Pre-Accept Licenses
         run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-pip python3-setuptools git zip unzip libncurses5 libstdc++6 openjdk-17-jdk libssl-dev libffi-dev build-essential wget
+          mkdir -p ~/.android && touch ~/.android/repositories.cfg
+          wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O cmd.zip
+          unzip -q cmd.zip -d tools && mkdir -p sdk/cmdline-tools && mv tools/cmdline-tools sdk/cmdline-tools/latest
+          yes | sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/sdk --licenses
           
-      - name: Force SDK Tools
-        run: |
-          mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools
-          wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O cmdline.zip
-          unzip -q cmdline.zip -d ~/.buildozer/android/platform/android-sdk/cmdline-tools
-          mv ~/.buildozer/android/platform/android-sdk/cmdline-tools/cmdline-tools ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest
-          mkdir -p ~/.buildozer/android/platform/android-sdk/tools/bin
-          ln -s ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
-
       - name: Install Buildozer
+        run: pip3 install --user buildozer cython==0.29.33
+          
+      - name: Build
         run: |
-          pip3 install --user --upgrade buildozer cython==0.29.33 cryptography
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Final Build
-        run: |
-          # The 'yes' command automates the licenses from build #97
-          yes | buildozer --verbose android debug --app-android-accept-sdk-license --profile
+          export PATH=$PATH:$HOME/.local/bin
+          buildozer --verbose android debug
