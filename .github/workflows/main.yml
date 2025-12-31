@@ -1,28 +1,28 @@
+name: build-apex
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
 
-import os
-from kivy.app import App
-from kivy.uix.label import Label
-from ctypes import CDLL
+      - name: System Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip python3-setuptools git zip unzip libncurses5 libstdc++6 openjdk-17-jdk libssl-dev libffi-dev build-essential
+          
+      - name: Install Buildozer
+        run: |
+          pip3 install --user --upgrade buildozer cython==0.29.33 cryptography
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-class ApexApp(App):
-    def build(self):
-        status = "System: Online"
-        try:
-            # Determining the path for the compiled C-core
-            # The .so file name depends on your buildozer settings
-            lib_path = os.path.join(os.getcwd(), "lib", "vessel.so")
-            
-            if os.path.exists(lib_path):
-                vessel = CDLL(lib_path)
-                # Assuming vessel_init is a function in your vessel.c
-                # vessel.vessel_init() 
-                status += "\nC-Core: Materialized"
-            else:
-                status += "\nC-Core: Not found in path"
-        except Exception as e:
-            status += f"\nResonance Error: {str(e)}"
-
-        return Label(text=status)
-
-if __name__ == '__main__':
-    ApexApp().run()
+      - name: Build APK
+        run: |
+          # 1. Force directory creation
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          
+          # 2. Inject license hashes
+          echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56263458b1005833e7b11815127d970af0c3f41\n263b06347e9f51381f412f94490d13d6976851e0" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+          
+          # 3. Execution
+          buildozer --verbose android debug --app-android-accept-sdk-license --profile
