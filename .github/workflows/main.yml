@@ -9,8 +9,22 @@ jobs:
       - name: System Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip python3-setuptools git zip unzip libncurses5 libstdc++6 openjdk-17-jdk libssl-dev libffi-dev build-essential
+          sudo apt-get install -y python3-pip python3-setuptools git zip unzip libncurses5 libstdc++6 openjdk-17-jdk libssl-dev libffi-dev build-essential wget
           
+      - name: Manual SDK Injection
+        run: |
+          # 1. Create clean directory structure
+          mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools
+          
+          # 2. Download stable commandlinetools from Google mirror
+          wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O cmdline.zip
+          unzip -q cmdline.zip -d ~/.buildozer/android/platform/android-sdk/cmdline-tools
+          mv ~/.buildozer/android/platform/android-sdk/cmdline-tools/cmdline-tools ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest
+          
+          # 3. Inject pre-verified license hashes to prevent 'Broken pipe'
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56263458b1005833e7b11815127d970af0c3f41\n263b06347e9f51381f412f94490d13d6976851e0" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+
       - name: Install Buildozer
         run: |
           pip3 install --user --upgrade buildozer cython==0.29.33 cryptography
@@ -18,12 +32,6 @@ jobs:
 
       - name: Build APK
         run: |
-          # 1. Clean any corrupted artifacts from previous runs
-          rm -rf ~/.buildozer
-          
-          # 2. Pre-create directory and inject license to avoid interaction
-          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-          echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56263458b1005833e7b11815127d970af0c3f41\n263b06347e9f51381f412f94490d13d6976851e0" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
-          
-          # 3. Execution with extra verbosity to track the network
+          # Linking buildozer to the manually prepared SDK
+          export ANDROID_SDK_HOME=~/.buildozer/android/platform/android-sdk
           buildozer --verbose android debug --app-android-accept-sdk-license --profile
