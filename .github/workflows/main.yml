@@ -5,26 +5,25 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: System Setup
+      
+      - name: Environment Setup
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip openjdk-17-jdk wget zip unzip libncurses5 libstdc++6
           
-      - name: Manual SDK Boot
+      - name: SDK Manual Install
         run: |
-          # Downloading official cmdline-tools to satisfy buildozer
-          wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O tools.zip
           mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O tools.zip
           unzip -q tools.zip -d ~/.buildozer/android/platform/android-sdk/cmdline-tools
           mv ~/.buildozer/android/platform/android-sdk/cmdline-tools/cmdline-tools ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest
           
-          # Direct license injection into the system
-          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-          echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56263458b1005833e7b11815127d970af0c3f41" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
-
-      - name: Build
+      - name: License Authorization
         run: |
-          pip3 install --user --upgrade buildozer cython==0.29.33 cryptography
+          yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/.buildozer/android/platform/android-sdk --licenses
+
+      - name: Build Execution
+        run: |
+          pip3 install --user --upgrade buildozer cython==0.29.33
           export PATH=$PATH:$HOME/.local/bin
-          # Building WITHOUT 'yes |' to prevent Broken pipe
-          buildozer --verbose android debug --app-android-accept-sdk-license
+          buildozer --verbose android debug
