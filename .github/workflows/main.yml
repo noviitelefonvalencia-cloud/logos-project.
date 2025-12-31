@@ -27,11 +27,20 @@ jobs:
 
       - name: Build APK
         run: |
-          # We force buildozer to use the already set up SDK
+          # Linking Buildozer to the pre-installed SDK environments
           export ANDROID_SDK_HOME=$ANDROID_HOME
-          export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/25.2.9519653
+          export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
           
-          # Accept all licenses via standard command
+          # Force accept licenses in the system SDK
           yes | sdkmanager --licenses || true
           
+          # Run build with clean environment and verbose logging
           buildozer --verbose android debug --profile
+        env:
+          APP_ANDROID_ACCEPT_SDK_LICENSE: 1
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: apex-artifact
+          path: bin/*.apk
