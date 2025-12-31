@@ -16,11 +16,22 @@ jobs:
           pip3 install --user --upgrade buildozer cython==0.29.33 cryptography
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
+      - name: Pre-setup Android SDK
+        run: |
+          # Manually download cmdline-tools to fix "sdkmanager path does not exist" error
+          mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O tools.zip
+          unzip -q tools.zip -d ~/.buildozer/android/platform/android-sdk/cmdline-tools
+          mv ~/.buildozer/android/platform/android-sdk/cmdline-tools/cmdline-tools ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest
+          
+          # Inject licenses manually to ensure non-interactive build
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56263458b1005833e7b11815127d970af0c3f41\n263b06347e9f51381f412f94490d13d6976851e0" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+
       - name: Build APK
         run: |
-          # Use the official flag to accept all licenses automatically
-          # This avoids the "path does not exist" error from manual injection
-          buildozer --verbose android debug --app-android-accept-sdk-license --profile
+          # Execute final compilation with verbose logging and profiling
+          buildozer --verbose android debug --profile
 
       - name: Upload
         uses: actions/upload-artifact@v4
