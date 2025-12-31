@@ -6,39 +6,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: System Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip python3-setuptools git zip unzip libncurses5 libstdc++6 libssl-dev libffi-dev build-essential
+          sudo apt-get install -y python3-pip python3-setuptools git zip unzip libncurses5 libstdc++6 openjdk-17-jdk libssl-dev libffi-dev build-essential
           
       - name: Install Buildozer
         run: |
           pip3 install --user --upgrade buildozer cython==0.29.33 cryptography
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Force Inject Licenses
+      - name: Pre-Inject Licenses
         run: |
-          # Creating license directory in both system and buildozer paths
-          mkdir -p $ANDROID_HOME/licenses
+          # We create the exact path Buildozer creates during runtime
           mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
           
-          # Injecting known hashes for Android SDK licenses
-          echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56263458b1005833e7b11815127d970af0c3f41\n263b06347e9f51381f412f94490d13d6976851e0" > $ANDROID_HOME/licenses/android-sdk-license
-          cp $ANDROID_HOME/licenses/android-sdk-license ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+          # Injecting verified license hashes directly into the future build folder
+          # This bypasses the interactive 'y/n' prompt and prevents 'Broken pipe'
+          echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56263458b1005833e7b11815127d970af0c3f41\n263b06347e9f51381f412f94490d13d6976851e0" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
 
       - name: Build APK
         run: |
-          # Direct linking to verified system SDK
-          export ANDROID_SDK_HOME=$ANDROID_HOME
-          export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
-          
+          # Pure buildozer run. It will find the injected license and proceed quietly.
           buildozer --verbose android debug --app-android-accept-sdk-license --profile
