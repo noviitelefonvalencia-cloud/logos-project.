@@ -6,10 +6,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: System Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip python3-setuptools git zip unzip libncurses5 libstdc++6 openjdk-17-jdk libssl-dev libffi-dev build-essential
+          sudo apt-get install -y python3-pip python3-setuptools git zip unzip libncurses5 libstdc++6 libssl-dev libffi-dev build-essential
           
       - name: Install Buildozer
         run: |
@@ -18,6 +27,19 @@ jobs:
 
       - name: Build APK
         run: |
-          # Use the built-in flag to accept all SDK licenses automatically
-          # This is the most stable way to prevent "Broken pipe" and interactive hangs
-          buildozer --verbose android debug --app-android-accept-sdk-license --profile
+          # Linking pre-installed SDK to buildozer to prevent 'Network unreachable'
+          export ANDROID_SDK_HOME=$ANDROID_HOME
+          export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
+          
+          # Accept licenses through the stable system manager
+          yes | sdkmanager --licenses || true
+          
+          buildozer --verbose android debug --profile
+        env:
+          APP_ANDROID_ACCEPT_SDK_LICENSE: 1
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: apex-artifact
+          path: bin/*.apk
