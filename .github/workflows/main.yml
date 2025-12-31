@@ -13,20 +13,18 @@ jobs:
           pip3 install --user --upgrade buildozer cython==0.29.33
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           
-      - name: Full SDK Authorization
+      - name: Pre-Authorize System SDK
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
         run: |
-          # Accepting EVERY possible license in the system SDK
+          # Accepting all system-level licenses first
           yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
-          
-          # Verification of license files
-          ls -R $ANDROID_SDK_ROOT/licenses
-          
-      - name: Build Execution
+
+      - name: Total Resonance Build
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
           ANDROID_NDK_ROOT: /usr/local/lib/android/sdk/ndk-bundle
         run: |
-          # Forcing buildozer to bypass internal license checks
-          buildozer --verbose android debug
+          # Using 'yes' to pipe confirmation directly into the build process
+          # This handles the internal Buildozer license prompts seen in log 113
+          yes | buildozer --verbose android debug
