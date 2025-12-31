@@ -5,20 +5,21 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: System Tools
-        run: sudo apt-get update && sudo apt-get install -y python3-pip openjdk-17-jdk wget zip unzip
-      
-      - name: Pre-Accept Licenses
+      - name: System Setup
         run: |
-          mkdir -p ~/.android && touch ~/.android/repositories.cfg
-          wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O cmd.zip
-          unzip -q cmd.zip -d tools && mkdir -p sdk/cmdline-tools && mv tools/cmdline-tools sdk/cmdline-tools/latest
-          yes | sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/sdk --licenses
+          sudo apt-get update
+          sudo apt-get install -y python3-pip openjdk-17-jdk wget zip unzip libncurses5 libstdc++6
+          
+      - name: SDK Prepare
+        run: |
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56263458b1005833e7b11815127d970af0c3f41" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
           
       - name: Install Buildozer
-        run: pip3 install --user buildozer cython==0.29.33
-          
-      - name: Build
         run: |
-          export PATH=$PATH:$HOME/.local/bin
-          buildozer --verbose android debug
+          pip3 install --user --upgrade buildozer cython==0.29.33 cryptography
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Execution
+        run: |
+          yes | buildozer --verbose android debug
