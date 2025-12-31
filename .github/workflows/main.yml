@@ -44,3 +44,4 @@ jobs:
         with:
           name: apex-artifact
           path: bin/*.apk
+
