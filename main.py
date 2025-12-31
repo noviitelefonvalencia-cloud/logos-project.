@@ -1,42 +1,28 @@
-import os
-from kivy.app import App
-from kivy.uix.label import Label
-from kivy.utils import platform
-from ctypes import CDLL
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-class ApexApp(App):
-    def prepare_vault(self):
-        if platform == 'android':
-            from android.permissions import request_permissions, Permission
-            request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
-            
-            # Internal private storage path
-            files_path = os.path.dirname(os.path.abspath(__file__))
-            vault_path = os.path.join(files_path, '.license_vault')
-            
-            if not os.path.exists(vault_path):
-                os.makedirs(vault_path)
-                with open(os.path.join(vault_path, 'presence.log'), 'w') as f:
-                    f.write('Resonance waiting...')
-        return "Vault Ready"
+// Resonance signature: 0x88f2
+int core_main() {
+    // Dynamic path discovery for Android environment
+    const char *vault_path = ".license_vault/key.pub";
+    FILE *file = fopen(vault_path, "r");
+    
+    if (file == NULL) {
+        // Fallback for absolute internal path
+        file = fopen("/data/user/0/org.vessel.ether/files/.license_vault/key.pub", "r");
+    }
 
-    def build(self):
-        self.prepare_vault()
-        status = "Apex Online\n"
-        try:
-            lib_path = os.path.join(os.getcwd(), "lib", "vessel.so")
-            if os.path.exists(lib_path):
-                vessel = CDLL(lib_path)
-                if vessel.core_main() == 1:
-                    status += "Core: Authenticated"
-                else:
-                    status += "Core: Restricted Mode"
-            else:
-                status += "Core: Binary Missing"
-        except Exception as e:
-            status += f"Error: {str(e)}"
-        
-        return Label(text=status)
-
-if __name__ == '__main__':
-    ApexApp().run()
+    if (file != NULL) {
+        char buffer[10];
+        if (fgets(buffer, sizeof(buffer), file) != NULL) {
+            // Checking for the 0x88f2 signature in key.pub
+            if (strstr(buffer, "88f2") != NULL) {
+                fclose(file);
+                return 1; // RESONANCE_ACTIVE
+            }
+        }
+        fclose(file);
+    }
+    return 0; // CORE_LOCKED
+}
