@@ -25,25 +25,22 @@ jobs:
           pip3 install --user --upgrade buildozer cython==0.29.33 cryptography
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Diagnostic Injector
-        run: |
-          echo "=== [SYSTEM CHECK: START] ==="
-          echo "Timestamp: $(date)"
-          df -h
-          echo "--- Path Verification ---"
-          ls -R $ANDROID_HOME/cmdline-tools || echo "ALARM: cmdline-tools missing"
-          echo "--- Context Variables ---"
-          echo "ANDROID_HOME: $ANDROID_HOME"
-          echo "JAVA_HOME: $JAVA_HOME"
-          echo "=== [SYSTEM CHECK: END] ==="
-
       - name: Build APK
         run: |
-          # Linking pre-installed SDK to buildozer
+          # 1. Quietly accept licenses via system sdkmanager (No pipes!)
+          sdkmanager --licenses <<EOF
+          y
+          y
+          y
+          y
+          y
+          y
+          y
+          EOF
+          
+          # 2. Link buildozer to the pre-installed system SDK
           export ANDROID_SDK_HOME=$ANDROID_HOME
           export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
           
-          # Stable license acceptance
-          yes | sdkmanager --licenses || true
-          
+          # 3. Final build with pure flag
           buildozer --verbose android debug --app-android-accept-sdk-license --profile
