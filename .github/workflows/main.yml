@@ -13,18 +13,16 @@ jobs:
           pip3 install --user --upgrade buildozer cython==0.29.33
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           
-      - name: Pre-Authorize System SDK
-        env:
-          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+      - name: Hard-Injection of SDK Licenses
         run: |
-          # Accepting all system-level licenses first
-          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
+          # Creating the license directory manually
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          # Injecting the exact hashes that signify 'Accepted' status
+          echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb7437c3550b3174304e\n24333f8a63b6825ea4c5573f691c9029c006d1d4" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+          echo -e "84831b9409646a918e30573bab4c9c91346d8abd" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
+          echo -e "d975f751698a77b662f1254ddbeed39c31016c28" > ~/.buildozer/android/platform/android-sdk/licenses/intel-android-extra-license
 
       - name: Total Resonance Build
-        env:
-          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-          ANDROID_NDK_ROOT: /usr/local/lib/android/sdk/ndk-bundle
         run: |
-          # Using 'yes' to pipe confirmation directly into the build process
-          # This handles the internal Buildozer license prompts seen in log 113
-          yes | buildozer --verbose android debug
+          # No more 'yes |' needed, licenses are pre-injected
+          buildozer --verbose android debug
