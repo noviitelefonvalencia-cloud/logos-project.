@@ -13,29 +13,34 @@ jobs:
           pip3 install --user --upgrade buildozer cython==0.29.33
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: SDK Mimicry and License Injection
+      - name: Forced SDK Structure Injection
         run: |
-          # 1. Defining target directories
+          # 1. Prepare absolute paths
           export SDK_DIR=$HOME/.buildozer/android/platform/android-sdk
           mkdir -p $SDK_DIR/cmdline-tools
           
-          # 2. Downloading Command Line Tools to bypass legacy path errors
+          # 2. Deploy Command Line Tools
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O tools.zip
           unzip -q tools.zip -d $SDK_DIR/cmdline-tools
           mv $SDK_DIR/cmdline-tools/cmdline-tools $SDK_DIR/cmdline-tools/latest
           
-          # 3. Creating the Logic Bridge (Critical fix for Build 126)
+          # 3. Mimicry: Creating the legacy path Buildozer expects
           mkdir -p $SDK_DIR/tools/bin
           ln -sf $SDK_DIR/cmdline-tools/latest/bin/sdkmanager $SDK_DIR/tools/bin/sdkmanager
           
-          # 4. Injecting License Hashes
+          # 4. License Injection (Direct byte-stream)
           mkdir -p $SDK_DIR/licenses
           echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb7437c3550b3174304e" > $SDK_DIR/licenses/android-sdk-license
           
-          # 5. Pre-authorizing SDK
+          # 5. Global Authorization
           yes | $SDK_DIR/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK_DIR --licenses || true
 
       - name: Build Materialization
         run: |
-          # The 'yes |' ensures any unexpected interactive prompt is suppressed
+          # Force redirection to the injected SDK to stop infinite downloading
+          export ANDROIDSDK=$HOME/.buildozer/android/platform/android-sdk
+          export ANDROIDNDK=$HOME/.buildozer/android/platform/android-ndk-r25b
+          export PATH=$PATH:$ANDROIDSDK/tools/bin:$ANDROIDSDK/platform-tools
+          
+          # Final resonance push
           yes | buildozer --verbose android debug
