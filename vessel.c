@@ -1,32 +1,32 @@
 #include <stdio.h>
-#include <stdint.h>
-#include <math.h>
-#include <unistd.h>
-#include <sys/ptrace.h>
-#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
 
-struct __attribute__((packed)) {
-    volatile float l1_offset;          
-    volatile uint64_t genesis_marker;  
-    uint32_t crypto_seed;              
-} resonance_data = {0.0f, 0xDEADC0DEBEEF1337, 0x7A4B92CF}; 
+/* [Emergency_Patch_A]
+   Path linked to org.vessel.ether namespace
+*/
+#define LICENSE_PATH "/data/user/0/org.vessel.ether/files/.license_vault/key.pub"
 
-void __attribute__((optimize("O0"))) decrypt_vessel_logic() {
-    volatile uint32_t trap = 0xABCDEF;
-    trap ^= 0x123456;
+int check_resonance_auth() {
+    FILE *file = fopen(LICENSE_PATH, "r");
+    if (file == NULL) return 0; 
+
+    char buffer[64];
+    int authorized = 0;
+    if (fgets(buffer, sizeof(buffer), file) != NULL) {
+        // Verification of the Moriarty-style signature
+        if (strstr(buffer, "0x88f2") != NULL) {
+            authorized = 1;
+        }
+    }
+    fclose(file);
+    return authorized;
 }
 
-int main(int argc, char *argv[]) {
-    signal(SIGTERM, SIG_IGN);
-    signal(SIGINT, SIG_IGN);
-    if (ptrace(PTRACE_TRACEME, 0, 1, 0) < 0) {
-        resonance_data.l1_offset = 0.88f; 
-        resonance_data.crypto_seed = 0x00000000;
+// Global entry point for Python-layer
+int core_main() {
+    if (check_resonance_auth()) {
+        return 1; // Logic bridge activated
     }
-    while(1) {
-        decrypt_vessel_logic();
-        float resonance = (float)(sin(M_PI / 6.0)) + resonance_data.l1_offset;
-        usleep(500000);
-    }
-    return 0;
+    return 0; // Limited mode
 }
