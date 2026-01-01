@@ -1,33 +1,27 @@
 [app]
-title = Vessel
-package.name = vessel
-package.domain = org.vessel.ether
+title = Logos Project
+package.name = logosproject
+package.domain = org.test
 source.dir = .
-source.include_exts = py,png,jpg,kv,atlas,pub,so
-source.include_patterns = assets/*,lib/*,key.pub
-version = 1.0.4
-
-requirements = python3,kivy==2.2.1,pillow,hostpython3,ctypes
+source.include_exts = py,png,jpg,kv,atlas,c,h,cpp
+version = 0.1
+requirements = python3,kivy
 
 orientation = portrait
-fullscreen = 1
-android.archs = arm64-v8a, armeabi-v7a
-android.allow_backup = False
+fullscreen = 0
+android.archs = arm64-v8a
 
-# Permission for the vault resonance
-android.permissions = READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
-
-# SDK/NDK sync with Workflow v.118
+# SDK/NDK configuration
 android.api = 33
 android.minapi = 21
-android.sdk = 33
 android.ndk = 25b
-android.ndk_path = ~/.buildozer/android/platform/android-ndk-r25b
-android.sdk_path = ~/.buildozer/android/platform/android-sdk
+android.build_tools_version = 33.0.0
+android.accept_sdk_license = True
+android.skip_update = True
 
-# Infrastructure
-p4a.branch = master
-p4a.bootstrap = sdl2
+# Forced path injection for GitHub Actions
+android.sdk_path = /home/runner/.buildozer/android/platform/android-sdk
+android.ndk_path = /home/runner/.buildozer/android/platform/android-ndk-r25b
 
 [buildozer]
 log_level = 2
