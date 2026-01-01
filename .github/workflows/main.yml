@@ -16,12 +16,18 @@ jobs:
       - name: Build Execution
         run: |
           git config --global --add safe.directory '*'
-          export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk
-          export ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
+          # Start build process. Verbose mode enabled for real-time tracking.
           yes | buildozer --verbose android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ColdChain-Apex-Debug
+          name: ColdChain-Apex-Final
           path: bin/*.apk
+
+      - name: Upload Full Log Backup
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-build-log
+          path: .buildozer/android/platform/build/dists/*/build/outputs/apk/debug/*.apk 
