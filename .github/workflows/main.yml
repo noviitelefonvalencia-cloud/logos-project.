@@ -16,7 +16,7 @@ jobs:
       - name: Build Execution
         run: |
           git config --global --add safe.directory '*'
-          # Start build process. Verbose mode enabled for tracking.
+          # Start build process with verbose output
           yes | buildozer --verbose android debug
 
       - name: Upload APK Artifact
