@@ -16,16 +16,16 @@ jobs:
       - name: Build Execution
         run: |
           git config --global --add safe.directory '*'
-          # Start build process. Verbose mode enabled for real-time tracking.
+          # Start build process. Verbose mode enabled for tracking.
           yes | buildozer --verbose android debug
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ColdChain-Apex-Final
           path: bin/*.apk
 
-      - name: Upload Full Log Backup
+      - name: Upload Build Log Backup
         if: always()
         uses: actions/upload-artifact@v4
         with:
