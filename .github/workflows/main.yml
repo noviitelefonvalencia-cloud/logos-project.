@@ -15,7 +15,7 @@ jobs:
 
       - name: Fix Git Directory and Build
         run: |
-          # Это решение критической ошибки из лога 0_build.txt
+          # Исправление критической ошибки доступа из лога 0_build.txt
           git config --global --add safe.directory '*'
           
           export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk
