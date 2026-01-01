@@ -13,9 +13,8 @@ jobs:
           pip3 install --user --upgrade buildozer cython==0.29.33
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Fix Git Directory and Build
+      - name: Build Execution
         run: |
-          # Исправление критической ошибки доступа из лога 0_build.txt
           git config --global --add safe.directory '*'
           
           export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk
