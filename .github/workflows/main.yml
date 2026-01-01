@@ -15,6 +15,7 @@ jobs:
 
       - name: Forced SDK Structure Injection
         run: |
+          # Manual SDK pre-installation to bypass 33% hang
           export SDK_DIR=$HOME/.buildozer/android/platform/android-sdk
           mkdir -p $SDK_DIR/cmdline-tools
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O tools.zip
@@ -24,11 +25,14 @@ jobs:
           ln -sf $SDK_DIR/cmdline-tools/latest/bin/sdkmanager $SDK_DIR/tools/bin/sdkmanager
           mkdir -p $SDK_DIR/licenses
           echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb7437c3550b3174304e" > $SDK_DIR/licenses/android-sdk-license
+          # Pre-fetching essential components before Buildozer starts
           yes | $SDK_DIR/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK_DIR "platform-tools" "platforms;android-33" "build-tools;33.0.0"
 
       - name: Build Materialization
         run: |
+          # Force redirection to pre-installed SDK
           export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk
           export ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
           export PATH=$PATH:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools
+          # Launch build with automated yes response
           yes | buildozer --verbose android debug
