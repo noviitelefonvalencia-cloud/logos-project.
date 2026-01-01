@@ -18,11 +18,10 @@ jobs:
           git config --global --add safe.directory '*'
           export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk
           export ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
-          # Redirecting output to a file for mobile access
-          yes | buildozer --verbose android debug > build_log.txt 2>&1 || true
+          yes | buildozer --verbose android debug
 
-      - name: Upload Build Log
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: full-build-log
-          path: build_log.txt
+          name: ColdChain-Apex-Debug
+          path: bin/*.apk
