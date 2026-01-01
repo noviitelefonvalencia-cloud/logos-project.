@@ -15,32 +15,32 @@ jobs:
 
       - name: Forced SDK Structure Injection
         run: |
-          # 1. Path preparation
+          # 1. Directory Setup
           export SDK_DIR=$HOME/.buildozer/android/platform/android-sdk
           mkdir -p $SDK_DIR/cmdline-tools
           
-          # 2. Command line tools deployment
+          # 2. Deploy Command Line Tools
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O tools.zip
           unzip -q tools.zip -d $SDK_DIR/cmdline-tools
           mv $SDK_DIR/cmdline-tools/cmdline-tools $SDK_DIR/cmdline-tools/latest
           
-          # 3. Path bridge creation (Mimicry)
+          # 3. Create Legacy Path Bridges
           mkdir -p $SDK_DIR/tools/bin
           ln -sf $SDK_DIR/cmdline-tools/latest/bin/sdkmanager $SDK_DIR/tools/bin/sdkmanager
           
-          # 4. License Injection (Fix for Broken pipe)
+          # 4. License Injection
           mkdir -p $SDK_DIR/licenses
           echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb7437c3550b3174304e" > $SDK_DIR/licenses/android-sdk-license
           
-          # 5. Forced Authorization
+          # 5. Pre-authorize SDK
           yes | $SDK_DIR/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK_DIR --licenses || true
 
       - name: Build Materialization
         run: |
-          # Environmental variables injection to stop cyclic downloading
+          # Force redirection to injected SDK
           export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk
           export ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
           export PATH=$PATH:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools
           
-          # Launching build with interactive suppression
+          # Execute build with automatic confirmation
           yes | buildozer --verbose android debug
