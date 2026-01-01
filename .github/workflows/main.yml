@@ -13,32 +13,13 @@ jobs:
           pip3 install --user --upgrade buildozer cython==0.29.33
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Forced SDK Structure Injection
+      - name: Fix Git Directory and Build
         run: |
-          export SDK_DIR=$HOME/.buildozer/android/platform/android-sdk
-          mkdir -p $SDK_DIR/cmdline-tools
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O tools.zip
-          unzip -q tools.zip -d $SDK_DIR/cmdline-tools
-          mv $SDK_DIR/cmdline-tools/cmdline-tools $SDK_DIR/cmdline-tools/latest
-          mkdir -p $SDK_DIR/tools/bin
-          ln -sf $SDK_DIR/cmdline-tools/latest/bin/sdkmanager $SDK_DIR/tools/bin/sdkmanager
-          mkdir -p $SDK_DIR/licenses
-          echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb7437c3550b3174304e" > $SDK_DIR/licenses/android-sdk-license
+          # Фикс прав для папок с точками
+          git config --global --add safe.directory '*'
           
-          # Force pre-install necessary components
-          yes | $SDK_DIR/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK_DIR "platform-tools" "platforms;android-33" "build-tools;33.0.0"
-
-      - name: Build Materialization
-        run: |
           export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk
           export ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
           
-          # INTERCEPTOR: Creating fake sdkmanager to prevent network hang at 75%
-          mkdir -p $HOME/fake_bin
-          echo -e "#!/bin/bash\necho 'Operation suppressed by Emergency_Patch_A'\nexit 0" > $HOME/fake_bin/sdkmanager
-          chmod +x $HOME/fake_bin/sdkmanager
-          export PATH=$HOME/fake_bin:$PATH
-          
-          # Final build command
-          export PATH=$PATH:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools
+          # Запуск сборки с игнорированием терминала
           yes | buildozer --verbose android debug
