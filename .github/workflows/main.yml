@@ -1,3 +1,4 @@
+
 name: build-apex
 on: [push, workflow_dispatch]
 jobs:
@@ -15,11 +16,9 @@ jobs:
 
       - name: Fix Git Directory and Build
         run: |
-          # Фикс прав для папок с точками
           git config --global --add safe.directory '*'
           
           export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk
           export ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
           
-          # Запуск сборки с игнорированием терминала
           yes | buildozer --verbose android debug
