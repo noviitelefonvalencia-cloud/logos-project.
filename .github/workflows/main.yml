@@ -15,32 +15,32 @@ jobs:
 
       - name: Forced SDK Structure Injection
         run: |
-          # 1. Directory Setup
+          # 1. Directory setup for direct injection
           export SDK_DIR=$HOME/.buildozer/android/platform/android-sdk
           mkdir -p $SDK_DIR/cmdline-tools
           
-          # 2. Deploy Command Line Tools
+          # 2. Deploy Command Line Tools to preempt buildozer download
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O tools.zip
           unzip -q tools.zip -d $SDK_DIR/cmdline-tools
           mv $SDK_DIR/cmdline-tools/cmdline-tools $SDK_DIR/cmdline-tools/latest
           
-          # 3. Create Legacy Path Bridges
+          # 3. Create legacy bridges
           mkdir -p $SDK_DIR/tools/bin
           ln -sf $SDK_DIR/cmdline-tools/latest/bin/sdkmanager $SDK_DIR/tools/bin/sdkmanager
           
-          # 4. License Injection
+          # 4. Inject pre-accepted licenses to stop "Broken pipe"
           mkdir -p $SDK_DIR/licenses
           echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb7437c3550b3174304e" > $SDK_DIR/licenses/android-sdk-license
           
-          # 5. Pre-authorize SDK
-          yes | $SDK_DIR/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK_DIR --licenses || true
+          # 5. Pre-fetch Platform Tools to stop the 33% hang
+          yes | $SDK_DIR/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK_DIR "platform-tools" "platforms;android-33" "build-tools;33.0.0"
 
       - name: Build Materialization
         run: |
-          # Force redirection to injected SDK
+          # Absolute path locking
           export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk
           export ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
           export PATH=$PATH:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools
           
-          # Execute build with automatic confirmation
-          yes | buildozer --verbose android debug
+          # Build with forced skip of SDK updates
+          buildozer --verbose android debug
