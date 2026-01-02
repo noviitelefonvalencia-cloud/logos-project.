@@ -1,41 +1,50 @@
 name: build-apex
 on: [push, workflow_dispatch]
+
 jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-      
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Free Disk Space
         run: |
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /opt/ghc
           sudo rm -rf "/usr/local/share/boost"
-          
+
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install System Dependencies
+      - name: Install Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip libncurses5 libstdc++6 wget zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev libncursesw5-dev
           pip3 install --user --upgrade buildozer cython==0.29.33 virtualenv
 
-      - name: Build with Buildozer
+      - name: Pre-accept Android Licenses
+        run: |
+          mkdir -p ~/.android
+          touch ~/.android/repositories.cfg
+          # Manually creating license files to bypass interactive prompts
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb743e1300a1a4d21f3c\n263b06347e330d1c9124847255f3c1061039031d" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+          echo -e "84831b9409646a918e30573bab4c9c91346d8abd\n50466322361034c56a6273b13483522273fcc344" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
+
+      - name: Build Android APK
         run: |
           export PATH=$PATH:$HOME/.local/bin
-          # Мы не ставим NDK вручную. Buildozer скачает нужную версию сам.
-          # yes | подтверждает лицензии SDK автоматически
-          yes | buildozer --verbose android debug
+          # Using --auto-accept-sdk-license through buildozer spec or direct command
+          buildozer -v android debug
         env:
-          # Принудительно указываем использовать правильную Java
-          JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.17-10/x64
+          JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: apex-release
+          name: ColdChain-Apex-Final
           path: bin/*.apk
