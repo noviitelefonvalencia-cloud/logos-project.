@@ -2,30 +2,28 @@
 title = LogosProject
 package.name = logosproject
 package.domain = org.logos
-
 source.dir = .
-source.include_exts = py,png,jpg,kv,atlas,json
+source.include_exts = py,png,jpg,kv,atlas,sh
 version = 0.1
-
-# Updated requirements based on build analysis
-requirements = python3,kivy==2.3.0,kivymd==1.1.1,pillow,requests,certifi,openssl,cython<3.0
+requirements = python3,kivy,requests,cryptography
 
 orientation = portrait
 fullscreen = 0
-android.archs = arm64-v8a, armeabi-v7a
-android.allow_backup = True
+android.archs = arm64-v8a
 
-# Target SDK and NDK optimization
+# Permissions
+android.permissions = INTERNET, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE
+
+# Android API (Stability focus)
 android.api = 33
 android.minapi = 21
 android.ndk = 25b
-android.ndk_path = 
+android.sdk = 33
 
-# Performance and build stability
-android.skip_update = False
-android.accept_sdk_license = True
+# Build options
 android.logcat_filters = *:S python:D
-
-# Buildozer engine settings
 p4a.branch = master
-p4a.bootstrap = sdl2
+
+[buildozer]
+log_level = 2
+warn_on_root = 1
