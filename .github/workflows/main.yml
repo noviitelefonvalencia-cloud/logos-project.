@@ -1,47 +1,41 @@
-name: Logos Debug Build
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+name: build-apex
+on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
-
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Setup-Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Step 1 - System Deps
+      - name: System-Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential git python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good libsqlite3-dev sqlite3 bzip2 libbz2-dev libssl-dev openssl libffi-dev libgmp-dev libmpfr-dev libmpc-dev unzip autoconf libtool pkg-config cmake ant
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            build-essential git python3-dev libssl-dev libffi-dev \
+            libncurses5 libncursesw5 pkg-config cmake ant unzip
 
-      - name: Step 2 - Build Tools
+      - name: Build-Tools
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install --user --upgrade "cython<3.0" buildozer virtualenv setuptools
-          # Debug: show where buildozer is
-          find $HOME/.local/bin -name buildozer
+          pip install --upgrade pip
+          pip install "cython<3.0" buildozer virtualenv requests cryptography
 
-      - name: Step 3 - Build APK
+      - name: Synthesis-Argus
         run: |
-          export PATH=$PATH:$HOME/.local/bin
-          # Run with extra verbose log
-          buildozer --version
-          buildozer -v android debug
-        env:
-          CI: true
+          chmod +x argus.sh
+          ./argus.sh
 
-      - name: Upload APK
-        if: always()
+      - name: Build-APK
+        run: |
+          yes | buildozer android debug
+        
+      - name: Upload-Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Logos-Package
+          name: Apex-Package
           path: bin/*.apk
