@@ -14,16 +14,15 @@ jobs:
       - name: Build Execution
         run: |
           git config --global --add safe.directory '*'
-          # Creating spec if missing
           if [ ! -f buildozer.spec ]; then buildozer init; fi
-          # Force requirements and permissions
+          # Принудительно включаем нужные настройки в spec
           sed -i 's/requirements =.*/requirements = python3,kivy,requests,jnius/' buildozer.spec
           sed -i 's/android.permissions =.*/android.permissions = INTERNET,REQUEST_INSTALL_PACKAGES/' buildozer.spec
-          sed -i 's/#android.accept_sdk_license =.*/android.accept_sdk_license = True/' buildozer.spec
-          # Running build with forced license acceptance
+          sed -i 's/# android.accept_sdk_license =.*/android.accept_sdk_license = True/' buildozer.spec
+          # Запуск сборки с авто-согласием
           yes | buildozer --verbose android debug
       - name: Upload Result
         uses: actions/upload-artifact@v4
         with:
-          name: ColdChain-Apex-v2
+          name: ColdChain-Apex-Final
           path: bin/*.apk
