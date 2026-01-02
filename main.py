@@ -1,4 +1,4 @@
-import subprocess, hashlib, os, requests, time
+import subprocess, os, requests, time
 try:
     from jnius import autoclass
 except ImportError:
@@ -7,9 +7,9 @@ except ImportError:
 class NexusElite:
     def __init__(self, key):
         self.parts = key.split('.')
-        self.gate = "https://stats.logos-apex.net/v2/secure_sync"
 
     def request_install_permission(self):
+        """Открывает настройки Android для разрешения установки APK"""
         if autoclass:
             try:
                 Activity = autoclass('org.kivy.android.PythonActivity').mActivity
