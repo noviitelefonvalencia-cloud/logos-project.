@@ -13,27 +13,29 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install Dependencies
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip libncurses5 libstdc++6 wget zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev
           pip3 install --user --upgrade buildozer cython==0.29.33 virtualenv
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Hard-accept Android Licenses
+      - name: Pre-configure Android SDK and NDK
         run: |
           mkdir -p ~/.android
           touch ~/.android/repositories.cfg
           mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          # Injection of verified license hashes
           echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb743e1300a1a4d21f3c\n263b06347e330d1c9124847255f3c1061039031d" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
           echo -e "84831b9409646a918e30573bab4c9c91346d8abd\n50466d3a0c07599c10712864be73fd3ef0219660" > ~/.buildozer/android/platform/android-sdk/licenses/android-googletv-license
 
       - name: Build Execution
         run: |
+          # Use non-interactive mode for buildozer
           buildozer --verbose android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ColdChain-Final-v154
+          name: ColdChain-v161
           path: bin/*.apk
