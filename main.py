@@ -1,48 +1,37 @@
-import subprocess, hashlib, os, json, requests, time
-# Using jnius for Android system bridge
+import subprocess, hashlib, os, requests, time
 try:
     from jnius import autoclass
 except ImportError:
     autoclass = None
 
 class NexusElite:
-    def __init__(self, license_key):
-        self.seed = "7A4B92CF"
-        self.key_parts = license_key.split('.')
-        self.gateway = "https://stats.logos-apex.net/v2/secure_sync"
+    def __init__(self, key):
+        self.parts = key.split('.')
+        self.gate = "https://stats.logos-apex.net/v2/secure_sync"
 
-    def request_unknown_sources(self):
-        """Triggers Android settings for unknown app installation"""
+    def request_install_permission(self):
         if autoclass:
             try:
-                PythonActivity = autoclass('org.kivy.android.PythonActivity')
+                Activity = autoclass('org.kivy.android.PythonActivity').mActivity
                 Intent = autoclass('android.content.Intent')
                 Settings = autoclass('android.provider.Settings')
                 Uri = autoclass('android.net.Uri')
                 Build = autoclass('android.os.Build')
-                activity = PythonActivity.mActivity
                 if Build.VERSION.SDK_INT >= 26:
-                    package_name = activity.getPackageName()
-                    uri = Uri.parse("package:" + package_name)
+                    uri = Uri.parse("package:" + Activity.getPackageName())
                     intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, uri)
-                    activity.startActivity(intent)
-                else:
-                    intent = Intent(Settings.ACTION_SECURITY_SETTINGS)
-                    activity.startActivity(intent)
+                    Activity.startActivity(intent)
             except: pass
 
     def run(self):
-        # Trigger biological adaptation on start
-        self.request_unknown_sources()
-        l1_val = self.key_parts[1] if len(self.key_parts) > 1 else "0.500"
+        self.request_install_permission()
+        l1 = self.parts[1] if len(self.parts) > 1 else "0.500"
         try:
-            # Executing the C core
-            self.process = subprocess.Popen(["./vessel", f"KEY_{l1_val}"])
-            while self.process.poll() is None:
+            self.proc = subprocess.Popen(["./vessel", f"KEY_{l1}"])
+            while self.proc.poll() is None:
                 time.sleep(1)
         except:
-            if hasattr(self, 'process'): self.process.terminate()
+            if hasattr(self, 'proc'): self.proc.terminate()
 
 if __name__ == "__main__":
-    nexus = NexusElite("ARCHITECT.0.500.INIT")
-    nexus.run()
+    NexusElite("ARCHITECT.0.500.INIT").run()
