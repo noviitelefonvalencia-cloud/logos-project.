@@ -1,4 +1,4 @@
-name: Logos Build Production
+name: Logos Direct Build
 
 on:
   push:
@@ -10,47 +10,34 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Install system dependencies
+      - name: Integrated Build Step
         run: |
+          # 1. System Deps
           sudo apt-get update
-          sudo apt-get install -y \
-            build-essential git python3-dev ffmpeg libsdl2-dev \
-            libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
-            libportmidi-dev libswscale-dev libavformat-dev \
-            libavcodec-dev zlib1g-dev libgstreamer1.0-dev \
-            gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
-            libsqlite3-dev sqlite3 bzip2 libbz2-dev libssl-dev \
-            openssl libffi-dev libgmp-dev libmpfr-dev libmpc-dev \
-            unzip autoconf libtool pkg-config cmake ant
+          sudo apt-get install -y build-essential git python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good libsqlite3-dev sqlite3 bzip2 libbz2-dev libssl-dev openssl libffi-dev libgmp-dev libmpfr-dev libmpc-dev unzip autoconf libtool pkg-config cmake ant
 
-      - name: Install Buildozer and Cython
-        run: |
+          # 2. Python Tools
           pip3 install --upgrade pip
           pip3 install --user --upgrade "cython<3.0" buildozer virtualenv setuptools
-          echo "BUILDOZER_INSTALL_COMPLETE"
-
-      - name: Build Android APK
-        run: |
+          
+          # 3. Running Buildozer
           export PATH=$PATH:$HOME/.local/bin
-          # Verify buildozer installation
           buildozer --version
-          # Start clean build
           buildozer android clean
           buildozer -v android debug
         env:
-          # This helps with non-interactive prompts
           CI: true
 
-      - name: Upload Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Logos-App-Debug
+          name: Logos-Package
           path: bin/*.apk
