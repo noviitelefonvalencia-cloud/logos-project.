@@ -1,4 +1,4 @@
-name: Logos Project Build
+name: Logos Build Final
 
 on:
   push:
@@ -55,7 +55,23 @@ jobs:
             cmake \
             ant
 
-      - name: Install Python build tools
+      - name: Install Buildozer and Cython
         run: |
           pip3 install --upgrade pip
-          pip3 install --user --
+          # Explicitly installing Cython < 3.0 as per Gemini 1 recommendation
+          pip3 install --user --upgrade "cython<3.0" buildozer virtualenv setuptools
+
+      - name: Build Android APK
+        run: |
+          # Adding local bin to PATH to find buildozer
+          export PATH=$PATH:$HOME/.local/bin
+          # Force cleaning to prevent index crashes
+          buildozer android clean
+          # Executing build in debug mode
+          buildozer -v android debug
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logos-Package
+          path: bin/*.apk
