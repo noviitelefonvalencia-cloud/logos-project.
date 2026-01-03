@@ -36,10 +36,7 @@ jobs:
             autoconf \
             libtool \
             pkg-config \
-            zlib1g-dev \
-            libgstreamer1.0-dev \
-            gstreamer1.0-plugins-base \
-            gstreamer1.0-plugins-good
+            zlib1g-dev
 
       - name: Install Python dependencies
         run: |
@@ -49,14 +46,14 @@ jobs:
 
       - name: Build APK with Buildozer
         run: |
-          # If buildozer.spec does not exist, initialize it
           if [ ! -f buildozer.spec ]; then buildozer init; fi
-          # Actual build command
-          buildozer -v android debug
-        continue-on-error: true
+          # Ensure android licenses are accepted and start build
+          yes | buildozer -v android debug
+        continue-on-error: false
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: logos-project-package
           path: bin/*.apk
+          if-no-files-found: error
